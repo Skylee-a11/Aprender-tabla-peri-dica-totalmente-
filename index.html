@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Aprende la tabla periódica</title>
-<link rel="manifest" href="manifest.webmanifest">
+<link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta name="theme-color" content="#1f5f4a">
@@ -302,14 +302,24 @@ xHist();
 /* Instalar como app (PWA) */
 let dp=null;
 try{if("serviceWorker" in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("sw.js").catch(()=>{})}catch(e){}
-addEventListener("beforeinstallprompt",e=>{e.preventDefault();dp=e});
+addEventListener("beforeinstallprompt",e=>{e.preventDefault();dp=e;$("inst").textContent="Instalar app"});
+setTimeout(()=>{if(!dp)$("inst").textContent="Cómo instalar"},3000);
 addEventListener("appinstalled",()=>{$("inst").hidden=true;$("ih").hidden=true});
 if(matchMedia("(display-mode: standalone)").matches||navigator.standalone)$("inst").hidden=true;
 $("inst").onclick=async()=>{
- if(dp){dp.prompt();await dp.userChoice;dp=null;return}
- const ios=/iphone|ipad|ipod/i.test(navigator.userAgent);
- $("ih").innerHTML=ios?"En iPhone o iPad: toca <b>Compartir</b> y luego <b>Agregar a pantalla de inicio</b>.":"En Chrome o Edge: abre el menú del navegador y elige <b>Instalar app</b> (en el celular, <b>Agregar a pantalla de inicio</b>). Funciona cuando la página está subida a un sitio con https.";
- $("ih").hidden=!$("ih").hidden};
+ if(dp){dp.prompt();const r=await dp.userChoice;dp=null;if(r.outcome=="accepted")$("inst").hidden=true;return}
+ if(!$("ih").hidden){$("ih").hidden=true;return}
+ $("ih").hidden=false;
+ if(/iphone|ipad|ipod/i.test(navigator.userAgent)){$("ih").innerHTML="En iPhone o iPad: toca <b>Compartir</b> y luego <b>Agregar a pantalla de inicio</b>.";return}
+ $("ih").textContent="Revisando…";const p=[];
+ if(location.protocol!="https:"&&location.hostname!="localhost")p.push("La página debe abrirse con https://. Ahora está en "+location.protocol);
+ if(top!==self)p.push("La página está dentro de otra (iframe). Ábrela directamente, no incrustada.");
+ try{const l=document.querySelector("link[rel=manifest]"),r=await fetch(l.href);if(!r.ok)throw 0;const m=await r.json();
+  for(const i of m.icons||[]){const x=await fetch(new URL(i.src,l.href));if(!x.ok)p.push("Falta el archivo "+i.src+" en el sitio.")}}
+ catch(e){p.push("No se pudo cargar manifest.json. Súbelo a la misma carpeta que index.html.")}
+ try{const g=await navigator.serviceWorker.getRegistration();if(!g)p.push("El service worker (sw.js) no está activo. Súbelo a la misma carpeta y recarga la página.")}
+ catch(e){p.push("Este navegador no permite service workers aquí.")}
+ $("ih").innerHTML=p.length?"<b>Qué falta para poder instalar:</b><br>"+p.join("<br>"):"Todo está bien. Recarga la página una vez y abre el menú del navegador: debe aparecer <b>Instalar app</b> (en computadora, también un icono en la barra de direcciones)."};
 </script>
 </body>
 </html>
