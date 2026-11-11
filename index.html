@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Aprende la tabla periódica</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="theme-color" content="#1f5f4a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Tabla periódica">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700&family=Figtree:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f3f4ef;--ink:#1d2320;--mut:#5d6862;--card:#fff;--line:#d5d9d0;--s:60%;--l:84%;--ok:#2e8b57;--bad:#c4452f;--acc:#1f5f4a;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#151a18;--ink:#e8ece9;--mut:#9aa7a0;--card:#1e2522;--line:#324039;--s:35%;--l:25%;--ok:#5cc58a;--bad:#ef7b66;--acc:#7fd3b0}}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Figtree,system-ui,sans-serif}
+h1,h2,.sym{font-family:"Bricolage Grotesque",Georgia,serif}
+header,main{max-width:1180px;margin:0 auto;padding:16px}
+h1{font-size:clamp(26px,4vw,38px);margin:8px 0 2px;letter-spacing:-.02em}
+header p{margin:0 0 14px;color:var(--mut)}
+nav{display:flex;gap:6px;flex-wrap:wrap}
+button,select,input{font:inherit;color:inherit}
+nav button{padding:8px 16px;border-radius:999px;border:1px solid var(--line);background:var(--card);cursor:pointer}
+nav button[aria-pressed=true]{background:var(--acc);color:var(--bg);border-color:var(--acc)}
+button:focus-visible,input:focus-visible,select:focus-visible,.cell:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+.wrap{overflow-x:auto;padding-bottom:8px}
+.grid{display:grid;grid-template-columns:repeat(18,minmax(46px,1fr));grid-template-rows:repeat(7,auto) 14px repeat(2,auto);gap:3px;min-width:900px}
+.cell{background:hsl(var(--h) var(--s) var(--l));border-radius:5px;padding:2px 3px;text-align:center;position:relative;min-height:56px;display:flex;flex-direction:column;justify-content:center;border:2px solid transparent;cursor:pointer;line-height:1.1}
+.cell b{font:700 18px "Bricolage Grotesque",sans-serif}
+.cell i{position:absolute;top:2px;left:4px;font-size:10px;font-style:normal;color:var(--mut)}
+.cell small{font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.grid.blank .cell b,.grid.blank .cell small{visibility:hidden}.grid.blank .cell i{display:none}
+.cell.dim{opacity:.18}.cell.sel{border-color:var(--ink)}.cell.ok{border-color:var(--ok);box-shadow:0 0 0 2px var(--ok)}.cell.bad{border-color:var(--bad);box-shadow:0 0 0 2px var(--bad)}
+.ph{border-radius:5px;border:1px dashed var(--line);font-size:10px;color:var(--mut);display:flex;align-items:center;justify-content:center}
+.legend{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0}
+.legend button{padding:4px 10px;border-radius:6px;border:2px solid transparent;background:hsl(var(--h) var(--s) var(--l));cursor:pointer;font-size:13px}
+.legend button[aria-pressed=true]{border-color:var(--ink)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin:12px 0}
+.detail{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.big{width:120px;height:120px;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:hsl(var(--h) var(--s) var(--l))}
+.big .sym{font-size:54px;font-weight:700;line-height:1}
+.detail h2{margin:0;font-size:26px}.detail dl{display:grid;grid-template-columns:auto auto;gap:2px 14px;margin:6px 0 0}.detail dt{color:var(--mut)}.detail dd{margin:0}
+.bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:6px}
+select,input[type=text]{padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--card)}
+.q{font:700 clamp(30px,6vw,52px)/1.1 "Bricolage Grotesque",sans-serif;margin:14px 0}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+input[type=text]{font-size:20px;flex:1;min-width:160px}
+.go{padding:8px 18px;border-radius:8px;border:0;background:var(--acc);color:var(--bg);cursor:pointer;font-weight:600}
+.fb{min-height:28px;margin-top:10px;font-weight:600}.fb.ok{color:var(--ok)}.fb.bad{color:var(--bad)}
+.stats{color:var(--mut);font-size:14px;margin-top:8px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.chips span{padding:2px 10px;border-radius:999px;border:1px solid var(--line);font-size:14px}
+[hidden]{display:none!important}
+.meter{height:8px;width:150px;border-radius:4px;background:var(--line);overflow:hidden}.meter i{display:block;height:100%;background:var(--ok)}
+.tag{font-size:14px;color:var(--acc);font-weight:600}
+.alt,.opts button{padding:8px 14px;border-radius:8px;border:1px solid var(--line);background:var(--card);cursor:pointer}
+.opts{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.srow{display:flex;width:100%;justify-content:space-between;align-items:center;gap:12px;text-align:left;padding:10px 14px;margin:5px 0;border:1px solid var(--line);border-radius:10px;background:var(--bg);cursor:pointer}
+.sc{font:700 22px "Bricolage Grotesque",sans-serif}.sa{color:var(--mut)}.srow.on .sa{color:var(--ink);font-weight:600}
+.score{display:flex;gap:32px;margin:6px 0 14px}.score div{color:var(--mut)}.score b{display:block;font:700 60px/1 "Bricolage Grotesque",sans-serif}.score .g b{color:var(--ok)}.score .r b{color:var(--bad)}
+.xi{padding:10px 14px;margin:6px 0;border:1px solid var(--line);border-left:5px solid var(--bad);border-radius:10px;background:var(--bg)}.xi.g{border-left-color:var(--ok)}.xi span{color:var(--mut);font-size:14px}
+summary{cursor:pointer;margin:12px 0}
+@media (prefers-reduced-motion:no-preference){.cell{transition:opacity .2s}}
+</style>
+</head>
+<body>
+<header>
+<h1>Aprende la tabla periódica</h1>
+<p>Explora, practica escribiendo y ubica cada elemento en su casilla. Lo que más fallas aparece más seguido.</p>
+<nav id="tabs"></nav>
+<button class="alt" id="inst" style="margin-top:10px">Instalar app</button>
+<div class="card stats" id="ih" hidden></div>
+</header>
+<main>
+<section id="v-ruta">
+<p class="stats">Sigue los pasos en orden: primero nombres, luego número atómico, masa, familia y ubicación. Un paso queda dominado con 80% de aciertos en al menos 15 intentos.</p>
+<div id="steps"></div>
+<div class="card" id="study" hidden>
+<h2 id="stt" style="margin:0 0 8px"></h2>
+<div class="bar"><label>Bloque <select id="sg"></select></label><button class="alt" id="sh">Mostrar todo</button><button class="alt" id="sm">Mezclar</button><button class="go" id="sp">Practicar este paso</button></div>
+<p class="stats">Mira la columna izquierda, intenta recordar la derecha y toca la fila para comprobar.</p>
+<div id="srows"></div>
+</div>
+</section>
+
+<section id="v-exp" hidden>
+<div class="legend" id="legend"></div>
+<div class="wrap"><div class="grid" id="g1"></div></div>
+<div class="card detail" id="detail"><p>Toca un elemento para ver sus datos.</p></div>
+</section>
+
+<section id="v-prac" hidden>
+<div class="card">
+<div class="bar">
+<label>Practicar <select id="pm"></select></label>
+<label>Elementos <select id="pr"></select></label>
+</div>
+<div class="q" id="pq"></div>
+<div class="row"><input type="text" id="pa" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Tu respuesta"><button class="go" id="pb">Comprobar</button></div>
+<div class="opts" id="pc"></div>
+<div class="fb" id="pf" aria-live="polite"></div>
+<div class="stats" id="ps"></div>
+<div class="chips" id="pw"></div>
+</div>
+</section>
+
+<section id="v-map" hidden>
+<div class="card">
+<div class="bar"><label>Elementos <select id="mr"></select></label><button class="go" id="mn">Siguiente</button></div>
+<div class="q" id="mq"></div>
+<div class="fb" id="mf" aria-live="polite"></div>
+<div class="stats" id="ms"></div>
+</div>
+<div class="wrap"><div class="grid blank" id="g2"></div></div>
+</section>
+<section id="v-exam" hidden>
+<div class="card" id="xs">
+<div class="bar">
+<label>Preguntas <select id="xn"><option>10</option><option>20</option><option>30</option></select></label>
+<label>Elementos <select id="xrg"></select></label>
+<label>Tipo <select id="xt"><option value="all">Todo mezclado</option><option value="names">Nombres y símbolos</option><option value="nums">Número y masa</option><option value="fam">Familia, periodo y grupo</option></select></label>
+</div>
+<p class="stats">No verás si aciertas mientras respondes. Al final te muestro cuántas fueron buenas y cuántas malas, y la corrección de cada error.</p>
+<button class="go" id="xgo">Empezar examen</button>
+<div class="stats" id="xh"></div>
+</div>
+<div class="card" id="xq" hidden>
+<div class="stats" id="xp"></div><div class="tag" id="xl"></div>
+<div class="q" id="xqq"></div>
+<div class="row"><input type="text" id="xa" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Tu respuesta"><select id="xsel" aria-label="Tu respuesta"></select><button class="go" id="xb">Siguiente</button></div>
+</div>
+<div class="card" id="xres" hidden>
+<div class="score" id="xsc"></div>
+<div id="xw"></div>
+<button class="go" id="xagain">Nuevo examen</button>
+</div>
+</section>
+</main>
+
+<script>
+const D="H,Hidrógeno,1.008;He,Helio,4.003;Li,Litio,6.94;Be,Berilio,9.012;B,Boro,10.81;C,Carbono,12.011;N,Nitrógeno,14.007;O,Oxígeno,15.999;F,Flúor,18.998;Ne,Neón,20.180;Na,Sodio,22.990;Mg,Magnesio,24.305;Al,Aluminio,26.982;Si,Silicio,28.085;P,Fósforo,30.974;S,Azufre,32.06;Cl,Cloro,35.45;Ar,Argón,39.948;K,Potasio,39.098;Ca,Calcio,40.078;Sc,Escandio,44.956;Ti,Titanio,47.867;V,Vanadio,50.942;Cr,Cromo,51.996;Mn,Manganeso,54.938;Fe,Hierro,55.845;Co,Cobalto,58.933;Ni,Níquel,58.693;Cu,Cobre,63.546;Zn,Zinc,65.38;Ga,Galio,69.723;Ge,Germanio,72.630;As,Arsénico,74.922;Se,Selenio,78.971;Br,Bromo,79.904;Kr,Kriptón,83.798;Rb,Rubidio,85.468;Sr,Estroncio,87.62;Y,Itrio,88.906;Zr,Circonio,91.224;Nb,Niobio,92.906;Mo,Molibdeno,95.95;Tc,Tecnecio,98;Ru,Rutenio,101.07;Rh,Rodio,102.91;Pd,Paladio,106.42;Ag,Plata,107.87;Cd,Cadmio,112.41;In,Indio,114.82;Sn,Estaño,118.71;Sb,Antimonio,121.76;Te,Telurio,127.60;I,Yodo,126.90;Xe,Xenón,131.29;Cs,Cesio,132.91;Ba,Bario,137.33;La,Lantano,138.91;Ce,Cerio,140.12;Pr,Praseodimio,140.91;Nd,Neodimio,144.24;Pm,Prometio,145;Sm,Samario,150.36;Eu,Europio,151.96;Gd,Gadolinio,157.25;Tb,Terbio,158.93;Dy,Disprosio,162.50;Ho,Holmio,164.93;Er,Erbio,167.26;Tm,Tulio,168.93;Yb,Iterbio,173.05;Lu,Lutecio,174.97;Hf,Hafnio,178.49;Ta,Tántalo,180.95;W,Wolframio,183.84;Re,Renio,186.21;Os,Osmio,190.23;Ir,Iridio,192.22;Pt,Platino,195.08;Au,Oro,196.97;Hg,Mercurio,200.59;Tl,Talio,204.38;Pb,Plomo,207.2;Bi,Bismuto,208.98;Po,Polonio,209;At,Astato,210;Rn,Radón,222;Fr,Francio,223;Ra,Radio,226;Ac,Actinio,227;Th,Torio,232.04;Pa,Protactinio,231.04;U,Uranio,238.03;Np,Neptunio,237;Pu,Plutonio,244;Am,Americio,243;Cm,Curio,247;Bk,Berkelio,247;Cf,Californio,251;Es,Einstenio,252;Fm,Fermio,257;Md,Mendelevio,258;No,Nobelio,259;Lr,Lawrencio,266;Rf,Rutherfordio,267;Db,Dubnio,268;Sg,Seaborgio,269;Bh,Bohrio,270;Hs,Hasio,269;Mt,Meitnerio,278;Ds,Darmstatio,281;Rg,Roentgenio,282;Cn,Copernicio,285;Nh,Nihonio,286;Fl,Flerovio,289;Mc,Moscovio,290;Lv,Livermorio,293;Ts,Teneso,294;Og,Oganesón,294";
+const CATS=[["Alcalinos",20],["Alcalinotérreos",45],["Metales de transición",205],["Otros metales",170],["Metaloides",100],["No metales",140],["Halógenos",290],["Gases nobles",265],["Lantánidos",320],["Actínidos",345]];
+const rng=(a,b)=>a<=z&&z<=b; let z;
+function cat(n){z=n;
+ if([3,11,19,37,55,87].includes(n))return 0; if([4,12,20,38,56,88].includes(n))return 1;
+ if([5,14,32,33,51,52].includes(n))return 4; if([1,6,7,8,15,16,34].includes(n))return 5;
+ if([9,17,35,53,85,117].includes(n))return 6; if([2,10,18,36,54,86,118].includes(n))return 7;
+ if(rng(57,71))return 8; if(rng(89,103))return 9;
+ if(rng(21,30)||rng(39,48)||rng(72,80)||rng(104,112))return 2; return 3}
+function pos(n){if(n>=57&&n<=71)return[9,n-54];if(n>=89&&n<=103)return[10,n-86];
+ if(n<=2)return[1,n==1?1:18];if(n<=10)return[2,n<=4?n-2:n+8];if(n<=18)return[3,n<=12?n-10:n];
+ if(n<=36)return[4,n-18];if(n<=54)return[5,n-36];if(n<=86)return[6,n<=56?n-54:n-68];return[7,n<=88?n-86:n-100]}
+const E=D.split(";").map((s,i)=>{const[a,b,c]=s.split(",");const n=i+1,p=pos(n),k=cat(n);return{z:n,s:a,n:b,m:c,k,r:p[0],c:p[1]}});
+const $=id=>document.getElementById(id);
+const norm=t=>t.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim();
+let st={miss:{},ok:0,tot:0,mok:0,mtot:0,pm:{}};
+try{st=Object.assign(st,JSON.parse(localStorage.getItem("tp-stats")||"{}"))}catch(e){}
+const save=()=>{try{localStorage.setItem("tp-stats",JSON.stringify(st))}catch(e){}};
+
+function build(el,onClick){
+ el.innerHTML="";
+ E.forEach(e=>{const d=document.createElement("button");d.className="cell";d.style.setProperty("--h",CATS[e.k][1]);
+  d.style.gridRow=e.r;d.style.gridColumn=e.c;d.dataset.z=e.z;d.setAttribute("aria-label",e.n);
+  d.innerHTML=`<i>${e.z}</i><b>${e.s}</b><small>${e.n}</small>`;d.onclick=()=>onClick(e);el.appendChild(d)});
+ [[6,"57–71"],[7,"89–103"]].forEach(([r,t])=>{const p=document.createElement("div");p.className="ph";p.style.gridRow=r;p.style.gridColumn=3;p.textContent=t;el.appendChild(p)});
+}
+const cellOf=(g,n)=>g.querySelector(`[data-z="${n}"]`);
+
+/* Explorar */
+let filt=-1;
+CATS.forEach((c,i)=>{const b=document.createElement("button");b.textContent=c[0];b.style.setProperty("--h",c[1]);b.setAttribute("aria-pressed","false");
+ b.onclick=()=>{filt=filt==i?-1:i;[...$("legend").children].forEach((x,j)=>x.setAttribute("aria-pressed",j==filt));
+  $("g1").querySelectorAll(".cell").forEach(d=>d.classList.toggle("dim",filt>=0&&E[d.dataset.z-1].k!=filt))};$("legend").appendChild(b)});
+build($("g1"),e=>{$("g1").querySelectorAll(".sel").forEach(x=>x.classList.remove("sel"));cellOf($("g1"),e.z).classList.add("sel");
+ const grp=e.r>7?"Serie "+(e.k==8?"de los lantánidos":"de los actínidos"):"Grupo "+(e.z>=57&&e.z<=71?3:e.c);
+ $("detail").innerHTML=`<div class="big" style="--h:${CATS[e.k][1]}"><span class="sym">${e.s}</span></div><div><h2>${e.n}</h2><dl>
+ <dt>Número atómico</dt><dd>${e.z}</dd><dt>Masa atómica</dt><dd>${e.m}</dd><dt>Familia</dt><dd>${CATS[e.k][0]}</dd><dt>Ubicación</dt><dd>${e.r>7?grp:"Periodo "+e.r+", "+grp}</dd></dl></div>`});
+
+/* Rangos */
+const RANGES=[[10,"Los primeros 10"],[20,"Los primeros 20"],[36,"Hasta el 36 (Kr)"],[54,"Hasta el 54 (Xe)"],[86,"Hasta el 86 (Rn)"],[118,"Los 118"]];
+["pr","mr"].forEach(id=>RANGES.forEach(r=>{const o=document.createElement("option");o.value=r[0];o.textContent=r[1];$(id).appendChild(o)}));
+$("pr").value=$("mr").value=20;
+function pick(max,last,f){const pool=E.filter(e=>e.z<=max&&e.z!=last&&(!f||f(e)));const w=pool.map(e=>1+3*(st.miss[e.z]||0));
+ let t=Math.random()*w.reduce((a,b)=>a+b,0);for(let i=0;i<pool.length;i++){t-=w[i];if(t<=0)return pool[i]}return pool[0]}
+
+/* Practicar */
+let cur,answered=false;
+const FAMN=CATS.map(c=>c[0]);
+const per=e=>e.r>7?(e.k==8?6:7):e.r;
+const MODES={
+ sn:{t:"Símbolo → nombre",q:e=>e.s,a:e=>e.n},
+ ns:{t:"Nombre → símbolo",q:e=>e.n,a:e=>e.s},
+ zn:{t:"Número atómico → nombre",q:e=>e.z,a:e=>e.n},
+ nz:{t:"Nombre → número atómico",q:e=>e.n,a:e=>String(e.z)},
+ nm:{t:"Nombre → masa atómica (redondeada)",q:e=>e.n,a:e=>String(Math.round(parseFloat(e.m))),tol:1,hint:"Masa sin decimales (se acepta ±1)"},
+ nf:{t:"Nombre → familia",q:e=>e.n,a:e=>FAMN[e.k],ch:FAMN},
+ np:{t:"Nombre → periodo",q:e=>e.n,a:e=>String(per(e)),ch:["1","2","3","4","5","6","7"]},
+ ng:{t:"Nombre → grupo (columna 1 a 18)",q:e=>e.n,a:e=>String(e.c),f:e=>e.r<=7,hint:"Número de columna"}
+};
+Object.keys(MODES).forEach(k=>{const o=document.createElement("option");o.value=k;o.textContent=MODES[k].t;$("pm").appendChild(o)});
+function nextP(){answered=false;const m=MODES[$("pm").value];cur=pick(+$("pr").value,cur&&cur.z,m.f);
+ $("pq").textContent=m.q(cur);$("pa").value="";$("pa").placeholder=m.hint||"";$("pf").textContent="";$("pf").className="fb";
+ $("pa").hidden=!!m.ch;$("pb").hidden=!!m.ch;$("pb").textContent="Comprobar";$("pc").innerHTML="";
+ if(m.ch)m.ch.forEach(c=>{const b=document.createElement("button");b.textContent=c;b.onclick=()=>check(c);$("pc").appendChild(b)});else $("pa").focus();
+ stats()}
+function stats(){$("ps").textContent=st.tot?`Aciertos: ${st.ok} de ${st.tot} (${Math.round(100*st.ok/st.tot)}%)`:"Escribe la respuesta y pulsa Enter.";
+ const m=E.filter(e=>st.miss[e.z]>0).sort((a,b)=>st.miss[b.z]-st.miss[a.z]).slice(0,8);
+ $("pw").innerHTML=m.length?"<span style=\"border:0\">Más fallados:</span>"+m.map(e=>`<span>${e.s} · ${e.n}</span>`).join(""):""}
+function check(c){if(answered){nextP();return}
+ const k=$("pm").value,m=MODES[k],ans=m.a(cur),u=typeof c=="string"?c:$("pa").value;if(!u.trim())return;
+ let good=norm(u)==norm(ans);if(m.tol&&!good)good=Math.abs(parseFloat(u)-parseFloat(ans))<=m.tol;
+ answered=true;st.tot++;const p=st.pm[k]=st.pm[k]||{ok:0,tot:0};p.tot++;
+ if(good){st.ok++;p.ok++;if(st.miss[cur.z])st.miss[cur.z]--;$("pf").textContent="¡Correcto!"+(m.tol?` Masa exacta: ${cur.m}`:"");$("pf").className="fb ok"}
+ else{st.miss[cur.z]=(st.miss[cur.z]||0)+1;$("pf").textContent=`Era: ${ans}`+(m.tol?` (${cur.m})`:"");$("pf").className="fb bad"}
+ save();stats();$("pb").hidden=false;$("pb").textContent="Siguiente"}
+$("pb").onclick=check;$("pa").onkeydown=e=>{if(e.key=="Enter")check()};
+$("pm").onchange=$("pr").onchange=nextP;
+
+/* Ubicar */
+let tgt,done=false;
+build($("g2"),e=>{if(done)return;done=true;st.mtot++;const g=$("g2");
+ if(e.z==tgt.z){st.mok++;if(st.miss[e.z])st.miss[e.z]--;$("mf").textContent="¡Correcto!";$("mf").className="fb ok"}
+ else{st.miss[tgt.z]=(st.miss[tgt.z]||0)+1;cellOf(g,e.z).classList.add("bad");$("mf").textContent=`Esa es ${e.n}. ${tgt.n} está en la casilla marcada.`;$("mf").className="fb bad"}
+ cellOf(g,tgt.z).classList.add("ok");g.classList.remove("blank");save();mstats()});
+function mstats(){$("ms").textContent=st.mtot?`Aciertos: ${st.mok} de ${st.mtot}`:"Toca la casilla donde crees que está."}
+function nextM(){done=false;const g=$("g2");g.classList.add("blank");g.querySelectorAll(".ok,.bad").forEach(x=>x.classList.remove("ok","bad"));
+ tgt=pick(+$("mr").value,tgt&&tgt.z);$("mq").textContent=`¿Dónde está el ${tgt.n}?`;$("mf").textContent="";$("mf").className="fb";mstats()}
+$("mn").onclick=nextM;$("mr").onchange=nextM;
+
+/* Pestañas */
+const V=[["ruta","Ruta de estudio"],["exp","Explorar"],["prac","Practicar"],["map","Ubicar en la tabla"],["exam","Examen"]];
+V.forEach(([id,t],i)=>{const b=document.createElement("button");b.textContent=t;b.onclick=()=>{
+ V.forEach(([x],j)=>{$("v-"+x).hidden=x!=id;$("tabs").children[j].setAttribute("aria-pressed",x==id)});
+ if(id=="ruta")drawRuta();if(id=="exam"&&(!X||X.done)){$("xs").hidden=false;$("xq").hidden=true;$("xres").hidden=true;xHist()}if(id=="prac"&&!cur)nextP();if(id=="map"&&!tgt)nextM()};b.setAttribute("aria-pressed",i==0);$("tabs").appendChild(b)});
+/* Ruta de estudio */
+const STEPS=[
+ {t:"1. Nombres y símbolos",d:"Primero aprende cómo se llama cada elemento y con qué letras se escribe.",m:["sn","ns"],c:e=>e.s,a:e=>e.n},
+ {t:"2. Número atómico",d:"Es el número de cada casilla y cuenta los protones del átomo.",m:["zn","nz"],c:e=>e.n,a:e=>e.z},
+ {t:"3. Masa atómica",d:"Masa promedio del átomo en unidades u. Al inicio basta con redondearla.",m:["nm"],c:e=>e.n,a:e=>e.m+" u"},
+ {t:"4. Familia",d:"El tipo de elemento: metal alcalino, gas noble, halógeno y demás.",m:["nf"],c:e=>e.n,a:e=>FAMN[e.k]},
+ {t:"5. Periodo y grupo",d:"Periodo es la fila (1 a 7) y grupo es la columna (1 a 18).",m:["np","ng"],c:e=>e.n,a:e=>"Periodo "+per(e)+(e.r>7?"":" · Grupo "+e.c)}
+];
+let sStep=0,show=false,ord=[];
+for(let g=0;g<12;g++){const o=document.createElement("option");o.value=g;o.textContent=`${g*10+1}–${Math.min(g*10+10,118)}`;$("sg").appendChild(o)}
+const openSet=new Set();
+function setOrd(){const g=+$("sg").value;ord=E.slice(g*10,g*10+10)}
+function accOf(s){let o=0,t=0;s.m.forEach(k=>{const p=st.pm[k];if(p){o+=p.ok;t+=p.tot}});return[o,t]}
+function goPractice(k){$("pm").value=k;$("tabs").children[2].click();nextP()}
+function renderStudy(){const s=STEPS[sStep],box=$("srows");box.innerHTML="";
+ ord.forEach(e=>{const on=show||openSet.has(e.z),b=document.createElement("button");
+  b.className="srow"+(on?" on":"");b.innerHTML=`<span class="sc">${s.c(e)}</span><span class="sa">${on?s.a(e):"Toca para ver"}</span>`;
+  b.onclick=()=>{openSet.has(e.z)?openSet.delete(e.z):openSet.add(e.z);renderStudy()};box.appendChild(b)});
+ $("sh").textContent=show?"Tapar respuestas":"Mostrar todo"}
+function openStudy(i){sStep=i;show=false;openSet.clear();setOrd();$("stt").textContent=STEPS[i].t;$("study").hidden=false;renderStudy();$("study").scrollIntoView({block:"nearest"})}
+function drawRuta(){const box=$("steps");box.innerHTML="";let rec=-1;
+ STEPS.forEach((s,i)=>{const[o,t]=accOf(s),pc=t?Math.round(100*o/t):0,ok=t>=15&&pc>=80;if(!ok&&rec<0)rec=i;
+  const d=document.createElement("div");d.className="card";
+  d.innerHTML=`<h2 style="margin:0 0 4px;font-size:22px">${s.t}</h2><p style="margin:0 0 10px;color:var(--mut)">${s.d}</p>
+  <div class="bar"><div class="meter"><i style="width:${pc}%"></i></div><span>${t?pc+"% de aciertos en "+t+" intentos":"Sin intentos todavía"}</span><span class="tag">${ok?"Dominado":i==rec?"Te toca este":""}</span></div>`;
+  const r=document.createElement("div");r.className="bar";
+  const b1=document.createElement("button");b1.className="alt";b1.textContent="Estudiar";b1.onclick=()=>openStudy(i);
+  const b2=document.createElement("button");b2.className="go";b2.textContent="Practicar";b2.onclick=()=>goPractice(s.m[0]);
+  r.append(b1,b2);d.appendChild(r);box.appendChild(d)})}
+$("sg").onchange=()=>{openSet.clear();setOrd();renderStudy()};
+$("sh").onclick=()=>{show=!show;openSet.clear();renderStudy()};
+$("sm").onclick=()=>{ord=ord.map(e=>[Math.random(),e]).sort((a,b)=>a[0]-b[0]).map(x=>x[1]);renderStudy()};
+$("sp").onclick=()=>goPractice(STEPS[sStep].m[0]);
+drawRuta();
+
+/* Examen */
+const XT={all:Object.keys(MODES),names:["sn","ns"],nums:["zn","nz","nm"],fam:["nf","np","ng"]};
+RANGES.forEach(r=>{const o=document.createElement("option");o.value=r[0];o.textContent=r[1];$("xrg").appendChild(o)});$("xrg").value=36;
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let X=null;
+function xHist(){$("xh").textContent=st.ex&&st.ex.length?"Tus últimos exámenes (buenas/total): "+st.ex.map(a=>a[0]+"/"+a[1]).join(" · "):"Todavía no has hecho ningún examen."}
+function xStart(){const max=+$("xrg").value,n=Math.min(+$("xn").value,max),ks=XT[$("xt").value];
+ const els=E.filter(e=>e.z<=max).map(e=>[Math.random(),e]).sort((a,b)=>a[0]-b[0]).slice(0,n).map(x=>x[1]);
+ const qs=els.map(e=>{const ok=ks.filter(k=>!MODES[k].f||MODES[k].f(e));return{e,k:ok[Math.floor(Math.random()*ok.length)],u:""}});
+ X={qs,i:0,done:false};$("xs").hidden=true;$("xres").hidden=true;$("xq").hidden=false;xShow()}
+function xShow(){const q=X.qs[X.i],m=MODES[q.k];
+ $("xp").textContent=`Pregunta ${X.i+1} de ${X.qs.length}`;$("xl").textContent=m.t;$("xqq").textContent=m.q(q.e);
+ const inp=$("xa"),sel=$("xsel");inp.hidden=!!m.ch;sel.hidden=!m.ch;inp.value="";inp.placeholder=m.hint||"";
+ if(m.ch)sel.innerHTML="<option value=\"\">Elige una opción</option>"+m.ch.map(c=>`<option>${c}</option>`).join("");
+ $("xb").textContent=X.i==X.qs.length-1?"Terminar examen":"Siguiente";(m.ch?sel:inp).focus()}
+function xNext(){const q=X.qs[X.i],m=MODES[q.k];q.u=(m.ch?$("xsel").value:$("xa").value).trim();X.i++;X.i>=X.qs.length?xEnd():xShow()}
+function xGood(m,u,e){const a=m.a(e);let g=norm(u)==norm(a);if(m.tol&&!g&&u)g=Math.abs(parseFloat(u)-parseFloat(a))<=m.tol;return g}
+function xEnd(){X.done=true;const bad=[],good=[];
+ X.qs.forEach(q=>{const m=MODES[q.k],p=st.pm[q.k]=st.pm[q.k]||{ok:0,tot:0};p.tot++;
+  if(xGood(m,q.u,q.e)){p.ok++;if(st.miss[q.e.z])st.miss[q.e.z]--;good.push(q)}else{st.miss[q.e.z]=(st.miss[q.e.z]||0)+1;bad.push(q)}});
+ st.ex=(st.ex||[]).concat([[good.length,X.qs.length]]).slice(-10);save();
+ const line=(q,c)=>{const m=MODES[q.k];return `<div class="xi ${c}"><b>${esc(m.q(q.e))}</b> <span>${m.t}</span><br>Tu respuesta: ${q.u?esc(q.u):"sin responder"}<br>Correcta: <b>${esc(m.a(q.e))}${m.tol?" ("+q.e.m+")":""}</b></div>`};
+ $("xsc").innerHTML=`<div class="g"><b>${good.length}</b>Buenas</div><div class="r"><b>${bad.length}</b>Malas</div>`;
+ $("xw").innerHTML=(bad.length?`<h3>Corrige estas ${bad.length}</h3>`+bad.map(q=>line(q,"")).join(""):"<h3>Sin errores. ¡Muy bien!</h3>")+(good.length?`<details><summary>Ver las ${good.length} buenas</summary>${good.map(q=>line(q,"g")).join("")}</details>`:"");
+ $("xq").hidden=true;$("xres").hidden=false}
+$("xgo").onclick=xStart;$("xb").onclick=xNext;$("xa").onkeydown=e=>{if(e.key=="Enter")xNext()};
+$("xagain").onclick=()=>{$("xres").hidden=true;$("xs").hidden=false;xHist()};
+xHist();
+
+/* Instalar como app (PWA) */
+let dp=null;
+try{if("serviceWorker" in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("sw.js").catch(()=>{})}catch(e){}
+addEventListener("beforeinstallprompt",e=>{e.preventDefault();dp=e});
+addEventListener("appinstalled",()=>{$("inst").hidden=true;$("ih").hidden=true});
+if(matchMedia("(display-mode: standalone)").matches||navigator.standalone)$("inst").hidden=true;
+$("inst").onclick=async()=>{
+ if(dp){dp.prompt();await dp.userChoice;dp=null;return}
+ const ios=/iphone|ipad|ipod/i.test(navigator.userAgent);
+ $("ih").innerHTML=ios?"En iPhone o iPad: toca <b>Compartir</b> y luego <b>Agregar a pantalla de inicio</b>.":"En Chrome o Edge: abre el menú del navegador y elige <b>Instalar app</b> (en el celular, <b>Agregar a pantalla de inicio</b>). Funciona cuando la página está subida a un sitio con https.";
+ $("ih").hidden=!$("ih").hidden};
+</script>
+</body>
+</html>
